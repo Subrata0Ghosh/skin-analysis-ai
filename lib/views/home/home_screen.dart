@@ -11,6 +11,7 @@ import '../scan/scan_camera_screen.dart';
 import '../results/results_screen.dart';
 import '../history/compare_scans_screen.dart';
 import 'widgets/progress_chart.dart';
+import 'widgets/aesthetics_guide_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -186,7 +187,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // Daily Skincare tip
           _buildDailyTipBanner(),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
+
+          // Qoves Scientific Aesthetics Advisor Card
+          _buildQovesAestheticsCard(),
+          const SizedBox(height: 16),
 
           // Core Radial Score Card
           Container(
@@ -326,6 +331,58 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(height: 4),
         Text(value, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 14)),
       ],
+    );
+  }
+
+  Widget _buildQovesAestheticsCard() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const AestheticsGuideScreen()),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.primaryGold.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.primaryGold.withValues(alpha: 0.2)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.primaryGold.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.grid_3x3, color: AppColors.primaryGold, size: 20),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    "Facial Aesthetics Reference",
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    "Explore Qoves vertical thirds, symmetry & angles",
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, color: AppColors.primaryGold, size: 14),
+          ],
+        ),
+      ),
     );
   }
 
