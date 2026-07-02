@@ -10,11 +10,15 @@ import '../results/results_screen.dart';
 
 class ScanningLoadingScreen extends StatefulWidget {
   final String imagePath;
+  final String? leftImagePath;
+  final String? rightImagePath;
   final VoidCallback onScanCompleted;
 
   const ScanningLoadingScreen({
     super.key,
     required this.imagePath,
+    this.leftImagePath,
+    this.rightImagePath,
     required this.onScanCompleted,
   });
 
@@ -25,6 +29,18 @@ class ScanningLoadingScreen extends StatefulWidget {
 class _ScanningLoadingScreenState extends State<ScanningLoadingScreen> with SingleTickerProviderStateMixin {
   late AnimationController _laserController;
   late Animation<double> _laserAnimation;
+
+  String get _currentImagePath {
+    final left = widget.leftImagePath ?? widget.imagePath;
+    final right = widget.rightImagePath ?? widget.imagePath;
+    if (_logIndex <= 2) {
+      return widget.imagePath;
+    } else if (_logIndex <= 4) {
+      return left;
+    } else {
+      return right;
+    }
+  }
 
   final List<String> _scanLogs = [
     "Initializing neural network model...",
@@ -148,7 +164,7 @@ class _ScanningLoadingScreenState extends State<ScanningLoadingScreen> with Sing
                           child: Opacity(
                             opacity: 0.6,
                             child: Image.file(
-                              File(widget.imagePath),
+                              File(_currentImagePath),
                               fit: BoxFit.cover,
                             ),
                           ),

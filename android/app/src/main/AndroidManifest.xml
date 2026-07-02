@@ -1,4 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Camera permission for live face scanning -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Vibration for haptic face-alignment feedback -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.front" android:required="false" />
     <application
         android:label="auraskin_ai"
         android:name="${applicationName}"
