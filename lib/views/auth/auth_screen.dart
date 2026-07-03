@@ -133,8 +133,12 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
         }
       }
     } catch (e) {
+      String readableError = e.toString();
+      if (readableError.contains('] ')) {
+        readableError = readableError.split('] ').last;
+      }
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage = readableError;
       });
     } finally {
       if (mounted) {
@@ -151,6 +155,36 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     });
     final authService = Provider.of<AuthService>(context, listen: false);
     final success = await authService.signInWithGoogle();
+    
+    if (success && mounted) {
+      final storageService = Provider.of<StorageService>(context, listen: false);
+      final profile = await storageService.getUserProfile(authService.currentUid!);
+      
+      if (!mounted) return;
+      if (profile != null && profile.name.isNotEmpty) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const QuestionnaireScreen()),
+        );
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _handleAppleSignIn() async {
+    setState(() {
+      _isLoading = true;
+    });
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final success = await authService.signInWithApple();
     
     if (success && mounted) {
       final storageService = Provider.of<StorageService>(context, listen: false);
@@ -453,7 +487,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: OutlinedButton(
-                                        onPressed: _handleGoogleSignIn,
+                                        onPressed: _handleAppleSignIn,
                                         style: OutlinedButton.styleFrom(
                                           side: BorderSide(color: AppColors.border.withValues(alpha: 0.3)),
                                           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -477,18 +511,36 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                       ),
                       const SizedBox(height: 20),
 
-                      // Evaluator Instant Access
+                      // Guest Mode Access
                       GestureDetector(
                         onTap: () async {
                           setState(() {
                             _isLoading = true;
                           });
-                          final authService = Provider.of<AuthService>(this.context, listen: false);
-                          await authService.login('demo@auraskin.ai', 'password123');
-                          if (!mounted) return;
-                          Navigator.of(this.context).pushReplacement(
-                            MaterialPageRoute(builder: (_) => const QuestionnaireScreen()),
-                          );
+                          final authService = Provider.of<AuthService>(context, listen: false);
+                          final storageService = Provider.of<StorageService>(context, listen: false);
+                          
+                          final success = await authService.signInAsGuest();
+                          if (success && mounted) {
+                            final profile = await storageService.getUserProfile(authService.currentUid!);
+                            if (!mounted) return;
+                            
+                            if (profile != null && profile.name.isNotEmpty) {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(builder: (_) => const HomeScreen()),
+                              );
+                            } else {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(builder: (_) => const QuestionnaireScreen()),
+                              );
+                            }
+                          } else {
+                            if (mounted) {
+                              setState(() {
+                                _isLoading = false;
+                              });
+                            }
+                          }
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
@@ -502,10 +554,10 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: const [
-                                  Icon(Icons.flash_on, color: AppColors.primaryGold, size: 16),
+                                  Icon(Icons.person_outline, color: AppColors.primaryGold, size: 16),
                                   SizedBox(width: 6),
                                   Text(
-                                    "Instant Demo Access (Evaluator Key)",
+                                    "Continue as Guest",
                                     style: TextStyle(
                                       color: AppColors.primaryGold,
                                       fontWeight: FontWeight.bold,
@@ -516,7 +568,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                               ),
                               const SizedBox(height: 4),
                               const Text(
-                                "Skip manual signups and load the offline simulation instantly",
+                                "Explore the app in offline simulation mode without registering",
                                 style: TextStyle(color: AppColors.textSecondary, fontSize: 10),
                                 textAlign: TextAlign.center,
                               ),

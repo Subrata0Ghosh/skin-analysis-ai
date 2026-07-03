@@ -6,6 +6,7 @@ class ScanIssue {
   final double radius; // relative overlay radius
   final String severity; // Mild, Moderate, Severe
   final String description;
+  final String faceSide; // 'front', 'left', or 'right'
 
   ScanIssue({
     required this.label,
@@ -15,6 +16,7 @@ class ScanIssue {
     required this.radius,
     required this.severity,
     required this.description,
+    this.faceSide = 'front',
   });
 
   Map<String, dynamic> toMap() {
@@ -26,6 +28,7 @@ class ScanIssue {
       'radius': radius,
       'severity': severity,
       'description': description,
+      'faceSide': faceSide,
     };
   }
 
@@ -38,6 +41,7 @@ class ScanIssue {
       radius: (map['radius'] as num).toDouble(),
       severity: map['severity'] ?? 'Mild',
       description: map['description'] ?? '',
+      faceSide: map['faceSide'] ?? 'front',
     );
   }
 }
@@ -46,7 +50,9 @@ class SkinScan {
   final String id;
   final String uid;
   final DateTime dateTime;
-  final String imagePath;
+  final String imagePath; // Front path
+  final String? leftImagePath;
+  final String? rightImagePath;
   final int overallScore; // 0 to 100 (higher is healthier)
   final int skinAge;
   final String skinType;
@@ -65,6 +71,8 @@ class SkinScan {
     required this.uid,
     required this.dateTime,
     required this.imagePath,
+    this.leftImagePath,
+    this.rightImagePath,
     required this.overallScore,
     required this.skinAge,
     required this.skinType,
@@ -83,6 +91,8 @@ class SkinScan {
       'uid': uid,
       'dateTime': dateTime.toIso8601String(),
       'imagePath': imagePath,
+      'leftImagePath': leftImagePath,
+      'rightImagePath': rightImagePath,
       'overallScore': overallScore,
       'skinAge': skinAge,
       'skinType': skinType,
@@ -102,6 +112,8 @@ class SkinScan {
       uid: map['uid'] ?? '',
       dateTime: DateTime.parse(map['dateTime'] ?? DateTime.now().toIso8601String()),
       imagePath: map['imagePath'] ?? '',
+      leftImagePath: map['leftImagePath'],
+      rightImagePath: map['rightImagePath'],
       overallScore: map['overallScore'] ?? 80,
       skinAge: map['skinAge'] ?? 25,
       skinType: map['skinType'] ?? 'Normal',

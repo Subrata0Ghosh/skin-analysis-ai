@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -12,6 +13,8 @@ import '../results/results_screen.dart';
 import '../history/compare_scans_screen.dart';
 import 'widgets/progress_chart.dart';
 import 'widgets/aesthetics_guide_screen.dart';
+import 'widgets/edit_profile_screen.dart';
+import 'widgets/notification_settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -195,54 +198,55 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // Core Radial Score Card
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             decoration: BoxDecoration(
-              color: AppColors.cardBg,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.border),
+              gradient: LinearGradient(
+                colors: [
+                  const Color(0xFF151522),
+                  AppColors.cardBg,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: AppColors.primaryGold.withValues(alpha: 0.25)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.25),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
+                )
+              ],
             ),
             child: Column(
               children: [
-                const Text(
-                  "OVERALL SKIN HEALTH",
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.0),
-                ),
-                const SizedBox(height: 20),
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Outer Circular Track
-                    SizedBox(
-                      height: 140,
-                      width: 140,
-                      child: CircularProgressIndicator(
-                        value: hasNoScans ? 0.0 : (lastScan!.overallScore / 100),
-                        strokeWidth: 10,
-                        backgroundColor: AppColors.border,
-                        color: AppColors.primaryGold,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.shield_outlined, color: AppColors.primaryGold, size: 14),
+                    SizedBox(width: 6),
+                    Text(
+                      "DIAGNOSTIC HEALTH INDEX",
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.5,
                       ),
-                    ),
-                    // Inner Details
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          hasNoScans ? "--" : "${lastScan!.overallScore}",
-                          style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                                fontSize: 44,
-                                fontWeight: FontWeight.w700,
-                              ),
-                        ),
-                        Text(
-                          hasNoScans ? "No Scans" : "Skin Age: ${lastScan!.skinAge}",
-                          style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
-                        ),
-                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
-                // Quick Summary
+                const SizedBox(height: 20),
+                
+                // Animated gauge
+                PremiumRadialScore(
+                  score: hasNoScans ? 0.0 : lastScan!.overallScore.toDouble(),
+                  skinAge: hasNoScans ? "No Scans" : "Skin Age: ${lastScan!.skinAge}",
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Quick Summary Table
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -250,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Container(height: 24, width: 1, color: AppColors.border),
                     _buildSummaryItem("Symmetry", hasNoScans ? "--" : "${lastScan!.symmetryScore.toStringAsFixed(0)}%"),
                     Container(height: 24, width: 1, color: AppColors.border),
-                    _buildSummaryItem("Issues", hasNoScans ? "None" : "${lastScan!.issues.length} Areas"),
+                    _buildSummaryItem("Concerns", hasNoScans ? "None" : "${lastScan!.issues.length} Areas"),
                   ],
                 ),
               ],
@@ -930,7 +934,28 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 32),
 
           // Skin Metadata Details
-          Text("Skin Metrics", style: Theme.of(context).textTheme.titleLarge),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Skin Metrics", style: Theme.of(context).textTheme.titleLarge),
+              TextButton.icon(
+                icon: const Icon(Icons.edit, size: 14, color: AppColors.primaryGold),
+                label: const Text("Edit", style: TextStyle(color: AppColors.primaryGold, fontSize: 13, fontWeight: FontWeight.bold)),
+                onPressed: () {
+                  if (_profile != null) {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => EditProfileScreen(
+                          profile: _profile!,
+                          onSaved: _loadData,
+                        ),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(16),
@@ -948,6 +973,40 @@ class _HomeScreenState extends State<HomeScreen> {
                 _buildProfileMetaRow("Aesthetic Goals", _profile?.goals.join(", ") ?? "Clearer skin"),
                 const Divider(color: AppColors.border),
                 _buildProfileMetaRow("Sensitivities", _profile?.knownSensitivities.isNotEmpty == true ? _profile!.knownSensitivities : "None reported"),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+
+          // Account & Notification Settings
+          Text("App Settings", style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 12),
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.cardBg,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.notifications_active_outlined, color: AppColors.primaryGold),
+                  title: const Text("Manage Notifications", style: TextStyle(fontSize: 14, color: Colors.white)),
+                  subtitle: const Text("Tweak routine and weekly scan alerts.", style: TextStyle(fontSize: 11)),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.textMuted),
+                  onTap: () {
+                    if (_profile != null) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => NotificationSettingsScreen(
+                            profile: _profile!,
+                            onSaved: _loadData,
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                ),
               ],
             ),
           ),
@@ -1084,5 +1143,176 @@ class _HomeScreenState extends State<HomeScreen> {
   bool authIsDemo() {
     final authService = Provider.of<AuthService>(context, listen: false);
     return authService.isDemoMode;
+  }
+}
+
+// Premium animated radial score gauge
+class PremiumRadialScore extends StatelessWidget {
+  final double score;
+  final String skinAge;
+
+  const PremiumRadialScore({
+    super.key,
+    required this.score,
+    required this.skinAge,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0.0, end: score / 100.0),
+      duration: const Duration(milliseconds: 1600),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        final currentScoreVal = (value * 100).toInt();
+        return Column(
+          children: [
+            SizedBox(
+              height: 160,
+              width: 160,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Gauge Custom Paint overlay
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: RadialScoreGaugePainter(progress: value),
+                    ),
+                  ),
+                  
+                  // Score numbers count-up and age indicator
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        score == 0.0 ? "--" : "$currentScoreVal",
+                        style: TextStyle(
+                          fontSize: 46,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          letterSpacing: -1,
+                          shadows: [
+                            Shadow(
+                              color: AppColors.primaryGold.withValues(alpha: 0.5),
+                              blurRadius: 15,
+                            )
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryGold.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppColors.primaryGold.withValues(alpha: 0.25), width: 0.5),
+                        ),
+                        child: Text(
+                          skinAge,
+                          style: const TextStyle(
+                            color: AppColors.primaryGold,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+// Custom Painter for the premium radial arc
+class RadialScoreGaugePainter extends CustomPainter {
+  final double progress;
+
+  RadialScoreGaugePainter({required this.progress});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 - 8;
+
+    final double startAngle = math.pi * 0.75;
+    final double totalSweepAngle = math.pi * 1.5;
+    final double activeSweepAngle = totalSweepAngle * progress;
+
+    // 1. Draw background track track
+    final trackPaint = Paint()
+      ..color = AppColors.border.withValues(alpha: 0.25)
+      ..strokeWidth = 8.0
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      startAngle,
+      totalSweepAngle,
+      false,
+      trackPaint,
+    );
+
+    // 2. Draw active glowing sweep
+    final activePaint = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          AppColors.primaryGold.withValues(alpha: 0.7),
+          AppColors.primaryGold,
+        ],
+      ).createShader(Rect.fromCircle(center: center, radius: radius))
+      ..strokeWidth = 8.0
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      startAngle,
+      activeSweepAngle,
+      false,
+      activePaint,
+    );
+
+    // 3. Draw active glow shadow under the arc
+    final glowPaint = Paint()
+      ..color = AppColors.primaryGold.withValues(alpha: 0.15)
+      ..strokeWidth = 14.0
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      startAngle,
+      activeSweepAngle,
+      false,
+      glowPaint,
+    );
+
+    // 4. Draw indicator needle/dot at the active tip
+    final double endAngle = startAngle + activeSweepAngle;
+    final double needleX = center.dx + radius * math.cos(endAngle);
+    final double needleY = center.dy + radius * math.sin(endAngle);
+
+    final needlePaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    final outerNeedlePaint = Paint()
+      ..color = AppColors.primaryGold
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(Offset(needleX, needleY), 7.0, outerNeedlePaint);
+    canvas.drawCircle(Offset(needleX, needleY), 3.5, needlePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant RadialScoreGaugePainter oldDelegate) {
+    return oldDelegate.progress != progress;
   }
 }

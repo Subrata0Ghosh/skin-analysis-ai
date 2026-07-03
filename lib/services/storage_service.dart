@@ -7,14 +7,18 @@ import '../models/skin_scan.dart';
 
 class StorageService {
   final bool _isFirebaseEnabled;
+  final FirebaseFirestore? _firestore;
 
-  StorageService(this._isFirebaseEnabled);
+  FirebaseFirestore get _db => _firestore ?? FirebaseFirestore.instance;
+
+  StorageService(this._isFirebaseEnabled, {FirebaseFirestore? firestore})
+      : _firestore = firestore;
 
   // User profile storage
   Future<void> saveUserProfile(UserProfile profile) async {
     if (_isFirebaseEnabled) {
       try {
-        await FirebaseFirestore.instance
+        await _db
             .collection('users')
             .doc(profile.uid)
             .set(profile.toMap());
@@ -32,7 +36,7 @@ class StorageService {
   Future<UserProfile?> getUserProfile(String uid) async {
     if (_isFirebaseEnabled) {
       try {
-        final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+        final doc = await _db.collection('users').doc(uid).get();
         if (doc.exists && doc.data() != null) {
           return UserProfile.fromMap(doc.data()!);
         }
@@ -58,7 +62,7 @@ class StorageService {
   Future<void> saveSkinScan(SkinScan scan) async {
     if (_isFirebaseEnabled) {
       try {
-        await FirebaseFirestore.instance
+        await _db
             .collection('users')
             .doc(scan.uid)
             .collection('scans')
@@ -92,7 +96,7 @@ class StorageService {
   Future<List<SkinScan>> getSkinScans(String uid) async {
     if (_isFirebaseEnabled) {
       try {
-        final query = await FirebaseFirestore.instance
+        final query = await _db
             .collection('users')
             .doc(uid)
             .collection('scans')
@@ -126,7 +130,7 @@ class StorageService {
   Future<void> deleteSkinScan(String uid, String scanId) async {
     if (_isFirebaseEnabled) {
       try {
-        await FirebaseFirestore.instance
+        await _db
             .collection('users')
             .doc(uid)
             .collection('scans')
@@ -157,7 +161,7 @@ class StorageService {
     if (_isFirebaseEnabled) {
       try {
         // Delete Firestore scans
-        final scans = await FirebaseFirestore.instance
+        final scans = await _db
             .collection('users')
             .doc(uid)
             .collection('scans')
@@ -166,7 +170,7 @@ class StorageService {
           await doc.reference.delete();
         }
         // Delete User doc
-        await FirebaseFirestore.instance.collection('users').doc(uid).delete();
+        await _db.collection('users').doc(uid).delete();
       } catch (e) {
         debugPrint("Firebase error wiping user data: $e");
       }

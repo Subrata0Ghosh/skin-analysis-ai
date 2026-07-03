@@ -152,7 +152,7 @@ void main() {
       expect(find.text("Join Aura"), findsOneWidget);
       expect(find.text("Email Address"), findsOneWidget);
       expect(find.text("Password"), findsOneWidget);
-      expect(find.text("Instant Demo Access (Evaluator Key)"), findsOneWidget);
+      expect(find.text("Continue as Guest"), findsOneWidget);
 
       // Click join aura tab
       await tester.tap(find.text("Join Aura"));

@@ -87,9 +87,11 @@ class _ScanningLoadingScreenState extends State<ScanningLoadingScreen> with Sing
     final authService = Provider.of<AuthService>(context, listen: false);
     final storageService = Provider.of<StorageService>(context, listen: false);
 
-    // Call service to run image processing
+    // Call service to run image processing on all 3 profiles
     final scanResult = await _scanService.analyzeSkinImage(
       widget.imagePath,
+      widget.leftImagePath,
+      widget.rightImagePath,
       authService.currentUid!,
     );
 
