@@ -5,6 +5,8 @@
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.38.7-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.10.7-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Gemini](https://img.shields.io/badge/Gemini-2.5%20Flash-4285F4?style=for-the-badge&logo=google-gemini&logoColor=white)](https://ai.google.dev)
 [![Firebase](https://img.shields.io/badge/Firebase-Auth%20%7C%20Firestore-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com)
 [![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20Windows-D4AF37?style=for-the-badge)](https://flutter.dev)
 
@@ -18,30 +20,33 @@ A premium, high-fidelity skin analysis companion and facial aesthetics guide. In
 
 ## 🌟 Key Features
 
-### 🔍 1. Dual-Layer Face Analysis
-*   **Skin Care Layer**: Maps and highlights dermatological indicators (acne, dark circles, wrinkles, oiliness, and redness hotspots) using glowing translucent overlays.
-*   **Facial Structure Layer**: Draws a golden wireframe grid detailing vertical thirds boundaries, sagital midline symmetry, eye alignment, and jawline slope angles.
-*   **Bi-directional Navigation**: Tapping visual hotspots on the face scrolls directly to their detailed breakdown card in the analysis feed.
+### 🔍 1. Real-Time AI Face Alignment & Camera Pipeline
+*   **Google ML Kit Integration**: Active face tracking monitors roll, pitch, yaw, distance, and centering in real-time.
+*   **Haptic Alignment Feedback**: Smart vibration patterns trigger to notify the user if alignment or head positioning is incorrect.
+*   **Automated Step Capture**: Guided step-by-step capturing process for **Front View**, **Left Profile**, and **Right Profile**, auto-snapping when alignment matches ideal constraints.
 
-### 📐 2. Qoves-Inspired Aesthetics Metrics
-*   **Bilateral Symmetry Scan**: Computes the RGB luminance and color deviation between left and right facial coordinates to evaluate a percentage symmetry index.
-*   **Vertical Thirds Proportions**: Evaluates forehead, midface, and lower face height ratios against the anatomical ideal of 33.3% each.
-*   **Mandibular Slope**: Estimates the gonial angle of the jawline in degrees.
+### 📐 2. Qoves-Inspired Aesthetics & Anatomy Guide
+*   **Bilateral Symmetry Scan**: Calculates color and contrast deviations across facial halves to output symmetry indices.
+*   **Anatomical Landmarks Mapping**: Interactive guides explaining key facial structure boundaries: Glabella (G), Pronasale (Prn), Subnasale (Sn), Menton (Me), Exocanthion (Ex), and Gonion (Go).
+*   **Proportion Estimator**: Real-time validation of vertical facial thirds ratios (Forehead, Midface, Lower Face) against the anatomical ideal of 33.3% each.
+*   **Mandibular Angle**: Automatically calculates gonial angles to evaluate jawline definition.
 
-### 🧘 3. Face Sculpting & Toning Checklist
-*   Curated routines for **Mewing** (correct tongue posture), **Gua Sha drainage sweeps**, **Cheekbone lifts**, and **Neck posture adjustments**.
-*   Integrated dashboard habit-tracker to log and record routines daily.
+### 🧘 3. Dynamic Results Dashboard & Treatment Predictor
+*   **Dual-Layer Overlays**: Glow overlays mapping skin care concerns (acne, redness, oiliness, wrinkles, dark circles) and facial skeletal third boundaries.
+*   **Skincare & Grooming Tips**: Tailored cleansers, serums, and moisturizers based on blemish indexes, plus custom hair and beard styling recommendations.
+*   **Time-Lapse Healing Predictor**: Simulated time slider displaying skin recovery progress over a 12-month period based on clinical target treatments.
 
-### 📅 4. Historical Progress & Comparison
-*   **Swipe Compare Slider**: View "Before" and "After" scans side-by-side with an interactive dragging lens.
-*   **Trend Charting**: Visualize score progression over weeks and months using a champagne-gold line chart.
+### ⚙️ 4. Premium Profile & Endpoint Configurations
+*   **User Profile Editor**: Edit name, age, gender, skin concerns, and custom notification parameters.
+*   **Custom Server URL & API Keys**: Input custom machine IP endpoints and personal Gemini API keys directly inside the App settings.
 
 ---
 
 ## 🌐 System Architecture
 
-AuraSkin AI features a self-healing boot cycle. If Firebase is offline or fails to compile (e.g. desktop Windows environment), the app automatically routes traffic to a persistent offline **Local Demo Mode** running on memory cache and `SharedPreferences`.
+AuraSkin AI features a self-healing hybrid structure. The app prioritizes the high-performance FastAPI server to compute advanced blemish maps using Gemini 2.5 Flash, falling back to local client-side computer vision models if offline.
 
+### 1. Initial Launch flow
 ```mermaid
 graph TD
     A[App Startup] --> B{Initialize Firebase}
@@ -50,6 +55,22 @@ graph TD
     D --> E[SharedPreferences Cache & Mock Services]
     C --> F[Access AuraSkin Dashboard]
     E --> F
+```
+
+### 2. Multi-Angle Diagnostic Engine
+```mermaid
+graph TD
+    A[Auto-Capture front/left/right profiles] --> B[ScanService: Analyze Skin]
+    B --> C{FastAPI Server Online?}
+    C -- Yes --> D[FastAPI Backend /analyze]
+    D --> E{Gemini API Key configured?}
+    E -- Yes --> F[Gemini 2.5 Flash Multimodal API]
+    E -- No --> G[Python CV Pixel Fallback Analysis]
+    C -- No --> H[Flutter CV Local Pixel Analysis]
+    F --> I[Construct detailed SkinScan JSON]
+    G --> I
+    H --> I
+    I --> J[Save Scan & View Results Screen]
 ```
 
 ---
@@ -61,9 +82,10 @@ graph TD
 | **Bilateral Face Symmetry** | ✅ Active | ✅ Active |
 | **Dual-Layer Wireframes** | ✅ Active | ✅ Active |
 | **Face Toning Routines** | ✅ Active | ✅ Active |
+| **Real-time Camera Guide** | 📸 ML Kit Auto-Capture | 📁 File Picker Simulation |
 | **Authentication** | 🔒 Firebase Auth | 🔑 Local Demo Bypass Key |
 | **Data Sync** | ☁️ Cloud Firestore | 💾 SharedPreferences Offline Storage |
-| **Startup Build Status** | ✅ Compiled APK | ✅ Native Release EXE |
+| **FastAPI Backend Sync** | ✅ Remote API Sync | ✅ Local Host Sync |
 
 ---
 
@@ -72,6 +94,7 @@ graph TD
 ### 📋 Prerequisites
 Ensure your development environment contains:
 *   **Flutter SDK**: `^3.38.7` (Dart `^3.10.7`)
+*   **Python**: `^3.9` (For running the diagnostic backend server)
 *   **Windows Toolchain**: Visual Studio 2022 with C++ Development workloads (for desktop target).
 *   **Android Toolchain**: Android Studio and SDK Tools (for mobile APK packaging).
 
@@ -83,13 +106,23 @@ Ensure your development environment contains:
     cd skin-analysis-ai
     ```
 
-2.  **Resolve dependencies:**
+2.  **Setup and Start the FastAPI Backend Server:**
     ```bash
-    flutter pub get
+    cd backend
+    pip install -r requirements.txt
+    
+    # Configure your Gemini API key (Optional: Fallback runs if omitted)
+    export GEMINI_API_KEY="your_google_gemini_api_key"
+    
+    # Run the server
+    uvicorn main:app --reload --host 0.0.0.0 --port 8000
     ```
+    *Note: When debugging on an Android Emulator, use `http://10.0.2.2:8000` to point to localhost.*
 
-3.  **Run static checks and tests:**
+3.  **Resolve App dependencies and run checks:**
     ```bash
+    cd ..
+    flutter pub get
     flutter analyze
     flutter test
     ```
@@ -110,11 +143,11 @@ Ensure your development environment contains:
         flutter build windows
         ```
         *Executable compiled to:* `build\windows\x64\runner\Release\auraskin_ai.exe`
-    *   **Android Debug APK:**
+    *   **Android Release APK:**
         ```bash
-        flutter build apk --debug
+        flutter build apk
         ```
-        *APK packaged to:* `build\app\outputs\flutter-apk\app-debug.apk`
+        *APK packaged to:* `build\app\outputs\flutter-apk\app-release.apk`
 
 ---
 
